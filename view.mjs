@@ -38,6 +38,11 @@ function actLabel(index) {
   return '终章 · 你的舞台意愿';
 }
 
+function questionNavigation(data, currentIndex = -1) {
+  return `<nav class="question-number-grid" aria-label="按题号选择要修改的答案">${data.questions.map((question, index) =>
+    `<button type="button" data-jump-index="${index}"${index === currentIndex ? ' aria-current="step"' : ''} aria-label="修改第 ${index + 1} 题：${escapeHtml(question.title)}">${index + 1}</button>`).join('')}</nav>`;
+}
+
 export function renderQuestion(data, session) {
   const index = session.currentIndex;
   const question = data.questions[index];
@@ -51,6 +56,7 @@ export function renderQuestion(data, session) {
     <section class="survey page-in" aria-labelledby="question-title">
       <div class="survey-top"><span>STAGE DNA / ${escapeHtml(actLabel(index))}</span><span>第 ${index + 1} / ${data.questions.length} 题</span></div>
       <div class="progress-track" role="progressbar" aria-valuenow="${index + 1}" aria-valuemin="1" aria-valuemax="${data.questions.length}" aria-label="题目进度"><span style="width:${((index + 1) / data.questions.length) * 100}%"></span></div>
+      ${answered === data.questions.length ? `<details class="question-jump"><summary>选择其他题号修改</summary>${questionNavigation(data, index)}</details>` : ''}
       <div class="question-shell">
         <p class="question-kicker">${escapeHtml(question.id)} · ${escapeHtml(question.title)}</p>
         <h1 id="question-title">${escapeHtml(question.question)}</h1>
@@ -62,6 +68,7 @@ export function renderQuestion(data, session) {
         <span>已回答 ${answered} / ${data.questions.length}</span>
         <button class="primary-button compact" data-action="next" ${selected ? '' : 'disabled'}>${index === data.questions.length - 1 ? '查看我的结果' : '下一题'} →</button>
       </div>
+      ${answered === data.questions.length ? '<button class="text-button return-results" data-action="result">返回查看结果 →</button>' : ''}
     </section>`;
 }
 
@@ -120,6 +127,7 @@ export function renderResults(data, result, selection = {}) {
   return `
     <section class="results page-in" aria-labelledby="result-title">
       <div class="result-heading"><p class="eyebrow">YOUR STAGE DNA</p><h1 id="result-title">你的两种舞台身份</h1><p>这是一份兴趣探索报告。最终分工由你、小组和教师共同协商。</p></div>
+      <section class="result-review" aria-label="修改答案"><h2>想修改某一题？</h2><p>点选题号即可直达；修改后可直接返回结果。</p>${questionNavigation(data)}</section>
       <div class="result-grid">
         <div class="report-panel">
           <div class="report-block"><p class="section-label">01 / 幕后工作兴趣</p><h2>${escapeHtml(roleLead)}</h2><p>${escapeHtml(secondaryText)}。每道幕后题选择一次计 1 分，分数表示本次选择次数。</p><ol class="score-list">${scoreList(data.backstageTypes, result.backstageScores, result.backstageGroups, 'role')}</ol></div>

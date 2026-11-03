@@ -1,5 +1,5 @@
 import { scoreAnswers } from './score.mjs';
-import { createSession, answerQuestion, moveQuestion, serializeSession } from './state.mjs';
+import { createSession, answerQuestion, moveQuestion, jumpQuestion, serializeSession } from './state.mjs';
 import { renderWelcome, renderQuestion, renderResults } from './view.mjs';
 import { downloadCard } from './card.mjs';
 import { downloadAssignment } from './assignment.mjs';
@@ -95,6 +95,14 @@ app.addEventListener('click', async (event) => {
     return;
   }
 
+  if (button.dataset.jumpIndex !== undefined) {
+    const index = Number(button.dataset.jumpIndex);
+    if (!Number.isInteger(index)) return;
+    session = jumpQuestion(session, data, index);
+    setScreen('question');
+    return;
+  }
+
   if (button.dataset.selectRole) {
     selection = { ...selection, role: button.dataset.selectRole };
     save();
@@ -135,6 +143,9 @@ app.addEventListener('click', async (event) => {
     case 'review':
       session = { ...session, currentIndex: 0 };
       setScreen('question');
+      break;
+    case 'result':
+      if (Object.keys(session.answers).length === data.questions.length) setScreen('result');
       break;
     case 'restart':
       if (window.confirm('重新开始会清除本设备保存的答案。确定继续吗？')) {

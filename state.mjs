@@ -38,6 +38,11 @@ export function moveQuestion(session, data, delta) {
   return { ...session, currentIndex };
 }
 
+export function jumpQuestion(session, data, index) {
+  const currentIndex = Math.min(Math.max(index, 0), data.questions.length - 1);
+  return { ...session, screen: 'question', currentIndex };
+}
+
 export function serializeSession(session) {
   return JSON.stringify(session);
 }
